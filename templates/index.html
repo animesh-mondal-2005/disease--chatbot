@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏥 Medical Diagnosis Chatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1b1b 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #dc2626 0%, #991b1b 100%);
+            padding: 1rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .header p {
+            margin-top: 0.5rem;
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .chat-section {
+            flex: 2;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            border: 1px solid #dc2626;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .chat-header {
+            background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+            padding: 1rem;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            min-height: 400px;
+            max-height: 500px;
+            background: rgba(26, 26, 26, 0.8);
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            text-align: right;
+        }
+
+        .user-message .content {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 20px 20px 5px 20px;
+            display: inline-block;
+            max-width: 70%;
+            word-wrap: break-word;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+        }
+
+        .bot-message .content {
+            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 20px 20px 20px 5px;
+            display: inline-block;
+            max-width: 85%;
+            word-wrap: break-word;
+            border: 1px solid #4b5563;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .diagnosis-result {
+            margin-top: 0.5rem;
+        }
+
+        .diagnosis-category {
+            margin-bottom: 1rem;
+        }
+
+        .diagnosis-category h4 {
+            color: #dc2626;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .diagnosis-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            margin-bottom: 0.3rem;
+            background: rgba(220, 38, 38, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #dc2626;
+        }
+
+        .diagnosis-item .disease {
+            font-weight: bold;
+        }
+
+        .diagnosis-item .percentage {
+            background: #dc2626;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        .input-section {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.6);
+            border-top: 1px solid #dc2626;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .symptom-input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #dc2626;
+            border-radius: 25px;
+            background: rgba(26, 26, 26, 0.8);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .symptom-input:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
+        }
+
+        .symptom-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            min-width: 120px;
+        }
+
+        .send-btn:hover {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
+        }
+
+        .send-btn:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .info-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            border: 1px solid #dc2626;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .info-panel h3 {
+            color: #dc2626;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+
+        .symptoms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .symptom-tag {
+            background: rgba(220, 38, 38, 0.2);
+            color: #fecaca;
+            padding: 0.5rem;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.85rem;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .symptom-tag:hover {
+            background: rgba(220, 38, 38, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            padding: 1rem;
+            color: #dc2626;
+        }
+
+        .loading-indicator.active {
+            display: block;
+        }
+
+        .loading-dots {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 20px;
+        }
+
+        .loading-dots div {
+            position: absolute;
+            top: 0;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #dc2626;
+            animation: loading-dots 1.2s linear infinite;
+        }
+
+        .loading-dots div:nth-child(1) { left: 8px; animation-delay: 0s; }
+        .loading-dots div:nth-child(2) { left: 30px; animation-delay: -0.4s; }
+        .loading-dots div:nth-child(3) { left: 52px; animation-delay: -0.8s; }
+
+        @keyframes loading-dots {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .input-container {
+                flex-direction: column;
+            }
+            
+            .send-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🏥 AI Medical Diagnosis Chatbot</h1>
+        <p>Describe your symptoms and get intelligent medical insights</p>
+    </header>
+
+    <div class="main-container">
+        <div class="chat-section">
+            <div class="chat-header">
+                💬 Medical Consultation
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="content">
+                        <strong>🤖 Medical Bot:</strong> Hello! I'm here to help analyze your symptoms using advanced AI reasoning. Please describe how you're feeling, and I'll provide insights using both rule-based and Bayesian analysis methods.
+                        <br><br>
+                        <em>⚠ Disclaimer: This is for informational purposes only. Always consult a qualified healthcare professional for actual medical advice.</em>
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading-indicator" id="loadingIndicator">
+                <div class="loading-dots">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+                <p>Analyzing symptoms...</p>
+            </div>
+
+            <div class="input-section">
+                <div class="input-container">
+                    <input 
+                        type="text" 
+                        class="symptom-input" 
+                        id="symptomInput" 
+                        placeholder="Describe your symptoms (e.g., 'I have fever, cough, and headache')"
+                        maxlength="500"
+                    >
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        📤 Analyze
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="info-panel">
+                <h3>🔬 How It Works</h3>
+                <p><strong>Rule-Based Analysis:</strong> Matches your symptoms against known disease patterns</p>
+                <br>
+                <p><strong>Bayesian Reasoning:</strong> Uses probabilistic inference considering disease prevalence and symptom relationships</p>
+            </div>
+
+            <div class="info-panel">
+                <h3>🩺 Recognized Symptoms</h3>
+                <div class="symptoms-grid" id="symptomsGrid">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSymptoms();
+            setupEventListeners();
+        });
+
+        async function loadSymptoms() {
+            try {
+                const response = await fetch('/symptoms');
+                const data = await response.json();
+                populateSymptoms(data.symptoms);
+            } catch (error) {
+                console.error('Error loading symptoms:', error);
+            }
+        }
+
+        function populateSymptoms(symptoms) {
+            const symptomsGrid = document.getElementById('symptomsGrid');
+            symptomsGrid.innerHTML = '';
+            
+            symptoms.forEach(symptom => {
+                const tag = document.createElement('div');
+                tag.className = 'symptom-tag';
+                tag.textContent = symptom.replace(/([a-z])([A-Z])/g, '$1 $2');
+                tag.onclick = () => addSymptomToInput(symptom);
+                symptomsGrid.appendChild(tag);
+            });
+        }
+
+        function addSymptomToInput(symptom) {
+            const input = document.getElementById('symptomInput');
+            const currentValue = input.value.trim();
+            
+            if (currentValue) {
+                input.value = currentValue + ', ' + symptom;
+            } else {
+                input.value = symptom;
+            }
+            input.focus();
+        }
+
+        function setupEventListeners() {
+            const input = document.getElementById('symptomInput');
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('symptomInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const sendBtn = document.getElementById('sendBtn');
+
+            addMessage(message, 'user');
+            
+            input.value = '';
+            sendBtn.disabled = true;
+            loadingIndicator.classList.add('active');
+
+            try {
+                const response = await fetch('/diagnose', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    addMessage(`Error: ${data.error}`, 'bot');
+                } else if (data.symptoms.length === 0) {
+                    addMessage("I couldn't detect any known symptoms in your message. Please try describing your symptoms using common medical terms like 'fever', 'cough', 'headache', etc.", 'bot');
+                } else {
+                    const responseText = `Based on the symptoms you described (${data.symptoms.join(', ')}), here's my analysis:`;
+                    addMessage(responseText, 'bot', { 
+                        ruleResults: data.rule_based, 
+                        bayesResults: data.bayesian 
+                    });
+                }
+            } catch (error) {
+                addMessage(`Error: ${error.message}`, 'bot');
+            } finally {
+                loadingIndicator.classList.remove('active');
+                sendBtn.disabled = false;
+                input.focus();
+            }
+        }
+
+        function createDiagnosisSection(title, results, isRuleBased) {
+            let section = `<div class="diagnosis-category"><h4>${title}:</h4>`;
+            
+            const topResults = Object.entries(results)
+                .filter(([, score]) => score > 0)
+                .slice(0, 5);
+
+            topResults.forEach(([disease, score]) => {
+                const percentage = Math.round(score * 100);
+                section += `
+                    <div class="diagnosis-item">
+                        <span class="disease">${disease}</span>
+                        <span class="percentage">${percentage}%</span>
+                    </div>
+                `;
+            });
+            
+            section += '</div>';
+            return section;
+        }
+
+        function addMessage(text, sender, diagnosisData = null) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+
+            if (sender === 'user') {
+                messageDiv.innerHTML = `<div class="content">${text}</div>`;
+            } else {
+                let content = `<div class="content"><strong>🤖 Medical Bot:</strong> ${text}`;
+                
+                if (diagnosisData) {
+                    content += '<div class="diagnosis-result">';
+                    
+                    if (Object.keys(diagnosisData.ruleResults).length > 0) {
+                        content += createDiagnosisSection("🔹 Rule-Based Analysis", diagnosisData.ruleResults, true);
+                    }
+                    
+                    if (Object.keys(diagnosisData.bayesResults).length > 0) {
+                        content += createDiagnosisSection("🔹 Bayesian Probability Analysis", diagnosisData.bayesResults, false);
+                    }
+                    
+                    content += '</div>';
+                }
+                
+                content += `<br><br><em>⚠ This analysis is for informational purposes only. Please consult a healthcare professional for proper medical advice.</em></div>`;
+                messageDiv.innerHTML = content;
+            }
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html>
